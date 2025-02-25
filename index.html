@@ -84,7 +84,7 @@
       function randomCar(carObj) {
         carObj.x = Math.random() < 0.5 ? -60 : 600;
         carObj.y = 100 + Math.floor(Math.random() * 400);
-        carObj.speed = (Math.random() * 5 + 1) * (carObj.x < 0 ? 1 : -1);
+        carObj.speed = (Math.random() * 10 + 1) * (carObj.x < 0 ? 1 : -1);
         carObj.element.style.background = randomColor();
         carObj.element.style.top = carObj.y + "px";
       }
@@ -104,17 +104,42 @@
         let e = createCar();
         cars.push({ element: e, x: -60, y: 200, speed: 2 });
       }
-      cars.forEach((c) => randomCar(c));
+      const keys = {
+        w: false,
+        s: false,
+        a: false,
+        d: false,
+      };
+
       document.addEventListener("keydown", (e) => {
-        if (e.key === "w" || e.key === "W") posY -= moveSpeed;
-        if (e.key === "s" || e.key === "S") posY += moveSpeed;
-        if (e.key === "a" || e.key === "A") posX -= moveSpeed;
-        if (e.key === "d" || e.key === "D") posX += moveSpeed;
-        updatePlayer();
+        if (e.key === "w" || e.key === "W") keys.w = true;
+        if (e.key === "s" || e.key === "S") keys.s = true;
+        if (e.key === "a" || e.key === "A") keys.a = true;
+        if (e.key === "d" || e.key === "D") keys.d = true;
       });
+
+      document.addEventListener("keyup", (e) => {
+        if (e.key === "w" || e.key === "W") keys.w = false;
+        if (e.key === "s" || e.key === "S") keys.s = false;
+        if (e.key === "a" || e.key === "A") keys.a = false;
+        if (e.key === "d" || e.key === "D") keys.d = false;
+      });
+
+      cars.forEach((c) => randomCar(c));
+      // document.addEventListener("keydown", (e) => {
+      //   if (e.key === "w" || e.key === "W") posY -= moveSpeed;
+      //   if (e.key === "s" || e.key === "S") posY += moveSpeed;
+      //   if (e.key === "a" || e.key === "A") posX -= moveSpeed;
+      //   if (e.key === "d" || e.key === "D") posX += moveSpeed;
+      //   updatePlayer();
+      // });
       function updatePlayer() {
         let maxX = container.clientWidth - player.clientWidth;
         let maxY = container.clientHeight - player.clientHeight;
+        if (keys.w) posY -= moveSpeed;
+        if (keys.s) posY += moveSpeed;
+        if (keys.a) posX -= moveSpeed;
+        if (keys.d) posX += moveSpeed;
         if (posX < 0) posX = 0;
         if (posX > maxX) posX = maxX;
         if (posY > maxY) posY = maxY;
