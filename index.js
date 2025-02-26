@@ -10,12 +10,15 @@ let score = 0;
 let cars = [];
 let gameOver = false;
 
+const winSound = new Audio("win-sound.mp3");
+
 function createCar() {
   let c = document.createElement("div");
   c.className = "car";
   container.appendChild(c);
   return c;
 }
+
 function randomCar(carObj) {
   carObj.x = Math.random() < 0.5 ? -60 : 600;
   carObj.y = 100 + Math.floor(Math.random() * 400);
@@ -23,6 +26,7 @@ function randomCar(carObj) {
   carObj.element.style.background = randomColor();
   carObj.element.style.top = carObj.y + "px";
 }
+
 function randomColor() {
   let r = Math.floor(Math.random() * 256)
     .toString(16)
@@ -49,23 +53,22 @@ const keys = {
 };
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === "w" || e.key === "W") keys.w = true;
-  if (e.key === "s" || e.key === "S") keys.s = true;
-  if (e.key === "a" || e.key === "A") keys.a = true;
-  if (e.key === "d" || e.key === "D") keys.d = true;
+  if (e.key.toLowerCase() === "w") keys.w = true;
+  if (e.key.toLowerCase() === "s") keys.s = true;
+  if (e.key.toLowerCase() === "a") keys.a = true;
+  if (e.key.toLowerCase() === "d") keys.d = true;
 });
 
 document.addEventListener("keyup", (e) => {
-  if (e.key === "w" || e.key === "W") keys.w = false;
-  if (e.key === "s" || e.key === "S") keys.s = false;
-  if (e.key === "a" || e.key === "A") keys.a = false;
-  if (e.key === "d" || e.key === "D") keys.d = false;
+  if (e.key.toLowerCase() === "w") keys.w = false;
+  if (e.key.toLowerCase() === "s") keys.s = false;
+  if (e.key.toLowerCase() === "a") keys.a = false;
+  if (e.key.toLowerCase() === "d") keys.d = false;
 });
 
 cars.forEach((c) => randomCar(c));
 
 function updatePlayer() {
-  // Prevent further movement if game is over
   if (gameOver) return;
 
   let maxX = container.clientWidth - player.clientWidth;
@@ -81,13 +84,18 @@ function updatePlayer() {
   player.style.top = posY + "px";
 }
 
-window.addEventListener("gamepadconnected", (e) => {});
-window.addEventListener("gamepaddisconnected", (e) => {});
+window.addEventListener("gamepadconnected", (e) => {
+  console.log("Gamepad connected:", e.gamepad);
+});
+window.addEventListener("gamepaddisconnected", (e) => {
+  console.log("Gamepad disconnected:", e.gamepad);
+});
 
 function readGamepad() {
   let g = navigator.getGamepads ? navigator.getGamepads() : [];
   for (const gp of g) {
     if (!gp) continue;
+
     let dz = 0.2;
     let x = gp.axes[0],
       y = gp.axes[1];
@@ -95,6 +103,11 @@ function readGamepad() {
     if (Math.abs(y) < dz) y = 0;
     posX += x * moveSpeed;
     posY += y * moveSpeed;
+
+    if (gp.buttons[0].pressed && gameOver) {
+      // "A" button on most controllers
+      location.reload();
+    }
   }
   updatePlayer();
 }
@@ -109,12 +122,14 @@ function loop() {
       c.element.style.left = c.x + "px";
       c.element.style.top = c.y + "px";
     });
+
     if (posY < 0) {
       score++;
       scoreDisplay.innerText = "Score: " + score;
       posY = 550;
       posX = 280;
       cars.forEach((c) => randomCar(c));
+      winSound.play(); // Play sound when reaching the end
     }
     checkCollision();
   }
@@ -140,7 +155,7 @@ function checkCollision() {
       playerY < carY + carHeight &&
       playerY + playerHeight > carY
     ) {
-      // collision
+      // Collision detected
       gameOver = true;
       scoreDisplay.innerText += " | Game Over!";
       playAgainBtn.style.display = "block";
