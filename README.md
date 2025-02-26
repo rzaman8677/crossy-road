@@ -1,2 +1,2 @@
 # crossy-road
-Cross the Indian Streets
+Cross the Streets safely
