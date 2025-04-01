@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Infinite Crossy</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div id="score">Score: 0</div>
@@ -12,9 +12,13 @@
     </div>
     <button id="playAgain">Play Again</button>
 
-    <div id="axes"></div>
-    <div id="buttons"></div>
+    <div id="leaderboard">
+      <h2>Top 10 Scores</h2>
+      <ol id="leaderboard-list"></ol>
+      <canvas id="leaderboard-chart" width="600" height="300"></canvas>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="index.js"></script>
   </body>
 </html>

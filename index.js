@@ -136,6 +136,67 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
+playAgainBtn.addEventListener("click", () => {
+  location.reload();
+});
+
+requestAnimationFrame(loop);
+
+function loadLeaderboard() {
+  return JSON.parse(localStorage.getItem("leaderboard") || "[]");
+}
+
+function saveLeaderboard(board) {
+  localStorage.setItem("leaderboard", JSON.stringify(board.slice(0, 10)));
+}
+
+function updateLeaderboard(newScore) {
+  let board = loadLeaderboard();
+  board.push({ score: newScore, timestamp: new Date().toISOString() });
+  board.sort((a, b) => b.score - a.score);
+  saveLeaderboard(board);
+}
+
+function displayLeaderboard() {
+  const list = document.getElementById("leaderboard-list");
+  const chartCanvas = document.getElementById("leaderboard-chart");
+  const board = loadLeaderboard();
+  list.innerHTML = "";
+
+  board.forEach((entry, index) => {
+    const li = document.createElement("li");
+    const date = new Date(entry.timestamp).toLocaleString();
+    li.textContent = `#${index + 1}: ${entry.score} (${date})`;
+    list.appendChild(li);
+  });
+
+  const labels = board.map((entry, i) => `#${i + 1}`);
+  const data = board.map((entry) => entry.score);
+
+  if (window.leaderboardChart) window.leaderboardChart.destroy();
+
+  window.leaderboardChart = new Chart(chartCanvas, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: "Top Scores",
+          data: data,
+          backgroundColor: "rgba(75, 192, 192, 0.6)",
+          borderColor: "rgba(75, 192, 192, 1)",
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true },
+      },
+    },
+  });
+}
+
 function checkCollision() {
   let playerWidth = 38.8,
     playerHeight = 38.8,
@@ -155,16 +216,14 @@ function checkCollision() {
       playerY < carY + carHeight &&
       playerY + playerHeight > carY
     ) {
-      // Collision detected
       gameOver = true;
       scoreDisplay.innerText += " | Game Over!";
       playAgainBtn.style.display = "block";
+
+      updateLeaderboard(score);
+      displayLeaderboard();
     }
   });
 }
 
-playAgainBtn.addEventListener("click", () => {
-  location.reload();
-});
-
-requestAnimationFrame(loop);
+displayLeaderboard();
